@@ -31,6 +31,10 @@ jobs:
       - name: Restore Spotify Cache
         run: echo "${{ secrets.SPOTIFY_CACHE }}" | base64 --decode > .cache
 
+      - name: Verify Cache File
+        run: |
+          ls -l .cache  # Check if file exists
+          cat .cache    # Print contents (should be obfuscated)
 
       - name: Run the script
         env:
