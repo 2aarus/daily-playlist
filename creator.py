@@ -30,7 +30,7 @@ print(current_time)
 token_info = sp.auth_manager.get_cached_token()
 if not token_info:
     print("❌ ERROR: No access token retrieved!")
-    exit(1)
+    token_info = sp.auth_manager.get_access_token(as_dict=True)
 else:
     print("✅ Token retrieved successfully.")
 results = sp.current_user_recently_played(limit=50)
