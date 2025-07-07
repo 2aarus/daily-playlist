@@ -27,6 +27,7 @@ jobs:
           echo "SPOTIFY_CLIENT_SECRET is set? " ${{ secrets.SPOTIFY_CLIENT_SECRET }}
           echo "SPOTIFY_REDIRECT_URI is set? " ${{ secrets.SPOTIFY_REDIRECT_URI }}
           echo "SPOTIFY_CACHE is set? " ${{ secrets.SPOTIFY_CACHE }}
+          echo "SMTPLIB_ID is set? " ${{ secrets.SMTPLIB_ID }}
       
       - name: Restore Spotify Cache
         run: echo "${{ secrets.SPOTIFY_CACHE }}" | base64 --decode > .cache
@@ -37,6 +38,7 @@ jobs:
           SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
           SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
           SPOTIFY_REDIRECT_URI: ${{ secrets.SPOTIFY_REDIRECT_URI }}
+          SMTPLIB_ID: ${{ secrets.SMTPLIB_ID }}
         run: python -u emailer.py
       
       - name: Save Updated Cache
