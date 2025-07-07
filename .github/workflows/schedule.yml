@@ -1,0 +1,53 @@
+name: Daily Playlist Update
+
+on:
+  schedule:
+    - cron: "0 */2 * * *"  # Runs every 2 hours
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  update-playlist:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Debug Environment Variables
+        run: |
+          echo "SPOTIFY_CLIENT_ID is set? " ${{ secrets.SPOTIFY_CLIENT_ID }}
+          echo "SPOTIFY_CLIENT_SECRET is set? " ${{ secrets.SPOTIFY_CLIENT_SECRET }}
+          echo "SPOTIFY_REDIRECT_URI is set? " ${{ secrets.SPOTIFY_REDIRECT_URI }}
+          echo "SPOTIFY_CACHE is set? " ${{ secrets.SPOTIFY_CACHE }}
+      
+      - name: Restore Spotify Cache
+        run: echo "${{ secrets.SPOTIFY_CACHE }}" | base64 --decode > .cache
+
+
+      - name: Run the script
+        env:
+          SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
+          SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
+          SPOTIFY_REDIRECT_URI: ${{ secrets.SPOTIFY_REDIRECT_URI }}
+        run: python -u emailer.py
+      
+      - name: Save Updated Cache
+        run: cat .cache | base64 > new_cache && mv new_cache .cache
+
+
+      - name: Commit and push changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add time.txt
+          git diff --cached --quiet || (git commit -m "Update time.txt" && git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git main)
