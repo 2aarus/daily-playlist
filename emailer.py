@@ -70,7 +70,7 @@ if track_uris:
     for i in range(len(track_uris)):
         temp = played_at_str + " : " + track_artists[i] + " – ", track_name[i]
         email_txt.append(temp)
-    email_content = '\n'.join(a)
+    email_content = '\n'.join(email_txt)
     msg.set_content(email_content)
 else:
     msg['Subject'] = "No new songs in " + playlist_name
