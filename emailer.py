@@ -68,7 +68,7 @@ with open('time.txt', 'w') as file:
 if track_uris:
     msg['Subject'] = "Update on " + playlist_name
     for i in range(len(track_uris)):
-        temp = played_at_str + " : " + track_artists[i] + " – ", track_name[i]
+        temp = played_at_str + " : " + track_artists[i] + " – " + track_name[i]
         email_txt.append(temp)
     email_content = '\n'.join(email_txt)
     msg.set_content(email_content)
