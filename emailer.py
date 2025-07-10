@@ -46,6 +46,13 @@ track_time = []
 track_name = []
 email_txt = []
 playlist_name = "mixtape/"+ str(date(day=datetime.now().day ,month=datetime.now().month ,year=datetime.now().year))
+timestamp = datetime.strptime(createtime.rstrip('Z'), "%Y-%m-%dT%H:%M:%S.%f")
+timestamp_date = timestamp.date()
+current_date = datetime.utcnow().date()
+if timestamp_date == current_date:
+    with open('time.txt', 'r') as file:
+        current_time = file.read().rstrip()
+        current_time = datetime.strptime(current_time, "%Y-%m-%dT%H:%M:%S.%fZ")
 for idx, item in enumerate(results['items']):
     played_at_str = item['played_at']
     try:
