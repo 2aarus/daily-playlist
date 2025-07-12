@@ -1,81 +1,65 @@
 import os
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-from datetime import datetime, time, date, timedelta
-import requests
-from io import BytesIO
-from PIL import Image
-import base64
+from datetime import datetime, timedelta, timezone
 import smtplib
 from email.message import EmailMessage
 
+# Load environment variables
 SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 SPOTIFY_REDIRECT_URI = os.getenv("SPOTIFY_REDIRECT_URI")
-SMTPLIB_ID = os.getenv("SMTPLIB_ID")
+SMTPLIB_ID = os.getenv("SMTPLIB_ID")  # Gmail App Password
 
-print("1")
-CACHE_PATH = os.path.join(os.getcwd(), ".cache")
+# Email setup
 msg = EmailMessage()
 msg['From'] = 'aarush.shivkumar@gmail.com'
 msg['To'] = 'nottingham_reds@hotmail.com'
+
+# Spotify Authentication
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
     client_id=SPOTIFY_CLIENT_ID,
     client_secret=SPOTIFY_CLIENT_SECRET,
     redirect_uri=SPOTIFY_REDIRECT_URI,
-    scope=["user-read-recently-played" ,"playlist-modify-public", "user-read-private", "ugc-image-upload"],
-    cache_path=CACHE_PATH
+    scope=["user-read-recently-played"],
+    cache_path=os.path.join(os.getcwd(), ".cache")
 ))
 
-current_time = datetime.combine(datetime.now(), time.min)
-with open('time.txt', 'r') as file:
-    createtime = file.read().rstrip()
-print(current_time)
+# Time window: Last 2 hours
+now = datetime.now(timezone.utc)
+time_threshold = now - timedelta(hours=2)
 
-token_info = sp.auth_manager.get_cached_token()
-if not token_info:
-    print("❌ ERROR: No access token retrieved!")
-    token_info = sp.auth_manager.get_access_token(as_dict=True)
-else:
-    print("✅ Token retrieved successfully.")
+# Fetch recently played tracks
 results = sp.current_user_recently_played(limit=50)
-print("3")
+
 track_uris = []
 track_artists = []
 track_time = []
 track_name = []
 email_txt = []
-playlist_name = "mixtape/"+ str(date(day=datetime.now().day ,month=datetime.now().month ,year=datetime.now().year))
-timestamp = datetime.strptime(createtime.rstrip('Z'), "%Y-%m-%dT%H:%M:%S.%f")
-timestamp_date = timestamp.date()
-current_date = datetime.utcnow().date()
-if timestamp_date == current_date:
-    with open('time.txt', 'r') as file:
-        current_time = file.read().rstrip()
-        current_time = datetime.strptime(current_time, "%Y-%m-%dT%H:%M:%S.%fZ")
+
+playlist_name = "mixtape/" + now.strftime("%Y-%m-%d")
+
 for idx, item in enumerate(results['items']):
     played_at_str = item['played_at']
     try:
-        played_at_time = datetime.strptime(played_at_str, "%Y-%m-%dT%H:%M:%S.%fZ")
+        played_at_time = datetime.strptime(played_at_str, "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc)
     except ValueError:
-        played_at_time = datetime.strptime(played_at_str, "%Y-%m-%dT%H:%M:%SZ")
-    if played_at_time > current_time:
-        if idx == 0:
-            createtime = item['played_at']
+        played_at_time = datetime.strptime(played_at_str, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+
+    if played_at_time > time_threshold:
         track = item['track']
         track_uris.append(track['uri'])
         track_artists.append(track['artists'][0]['name'])
         track_time.append(played_at_str)
         track_name.append(track['name'])
         print(idx, track['artists'][0]['name'], " – ", track['name'])
-with open('time.txt', 'w') as file:
-    file.seek(0)
-    file.truncate()
-    file.write(str(createtime))
+
+# Compose email using your original logic and formatting
 if track_uris:
     msg['Subject'] = "Update on " + playlist_name
     for i in range(len(track_uris)):
-        temp = played_at_str + " : " + track_artists[i] + " – " + track_name[i]
+        temp = track_time[i] + " : " + track_artists[i] + " – " + track_name[i]
         email_txt.append(temp)
     email_content = '\n'.join(email_txt)
     msg.set_content(email_content)
@@ -83,6 +67,7 @@ else:
     msg['Subject'] = "No new songs in " + playlist_name
     msg.set_content("Check later")
 
+# Send email
 with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
     smtp.login('aarush.shivkumar@gmail.com', SMTPLIB_ID)
     smtp.send_message(msg)
