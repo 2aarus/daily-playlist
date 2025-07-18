@@ -51,7 +51,7 @@ for idx, item in enumerate(results['items']):
         track = item['track']
         track_uris.append(track['uri'])
         track_artists.append(track['artists'][0]['name'])
-        track_time.append(played_at_str)
+        track_time.append(played_at_time)
         track_name.append(track['name'])
         print(idx, track['artists'][0]['name'], " – ", track['name'])
 
@@ -59,7 +59,8 @@ for idx, item in enumerate(results['items']):
 if track_uris:
     msg['Subject'] = "Update on " + playlist_name
     for i in range(len(track_uris)):
-        temp = track_time[i] + " : " + track_artists[i] + " – " + track_name[i]
+        song_time = track_time[i] + timedelta(hours=5, minutes=30)
+        temp = str(song_time) + " : " + track_artists[i] + " – " + track_name[i]
         email_txt.append(temp)
     email_content = '\n'.join(email_txt)
     msg.set_content(email_content)
