@@ -65,7 +65,7 @@ if track_uris:
     email_content = '\n'.join(email_txt)
     msg.set_content(email_content)
 else:
-    msg['Subject'] = "No new songs in " + playlist_name
+    msg['Subject'] = "No new songs in " + playlist_name.replace("mixtape/")
     msg.set_content("Check later")
 
 # Send email
