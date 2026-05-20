@@ -4,6 +4,7 @@ from spotipy.oauth2 import SpotifyOAuth
 from datetime import datetime, timedelta, timezone
 import smtplib
 from email.message import EmailMessage
+from datetime import datetime
 
 # Load environment variables
 SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
@@ -71,7 +72,7 @@ else:
 with open('time.txt', 'w') as file:
     file.seek(0)
     file.truncate()
-    file.write(str(createtime))
+    file.write(str(datetime.now()))
     
 # Send email
 with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
