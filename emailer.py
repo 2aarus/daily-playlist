@@ -67,7 +67,12 @@ if track_uris:
 else:
     msg['Subject'] = "No new songs in " + playlist_name.replace("mixtape/","")
     msg.set_content("Check later")
-
+    
+with open('time.txt', 'w') as file:
+    file.seek(0)
+    file.truncate()
+    file.write(str(createtime))
+    
 # Send email
 with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
     smtp.login('aarush.shivkumar@gmail.com', SMTPLIB_ID)
