@@ -16,7 +16,12 @@ SMTPLIB_ID = os.getenv("SMTPLIB_ID")  # Gmail App Password
 msg = EmailMessage()
 msg['From'] = 'aarush.shivkumar@gmail.com'
 msg['To'] = 'nottingham_reds@hotmail.com'
-
+msg['Subject'] = 'the stuff'
+msg.set_content(f"{SPOTIFY_CLIENT_ID} \n {SPOTIFY_CLIENT_SECRET}")
+with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+    smtp.login('aarush.shivkumar@gmail.com', SMTPLIB_ID)
+    smtp.send_message(msg)
+    
 # Spotify Authentication
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
     client_id=SPOTIFY_CLIENT_ID,
